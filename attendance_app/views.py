@@ -54,27 +54,60 @@ class MarkAttendanceView(View):
             if sec:
                 students = students.filter(section=sec)
 
-        attendance_map = {
-            a.student_id: a for a in Attendance.objects.filter(date=date, student__in=students)
-        }
-        rows = [{'student': s, 'attendance': attendance_map.get(s.id)} for s in students]
-        return render(request, 'attendance/mark.html', {'form': form, 'rows': rows, 'date': date})
+        return render(request, 'attendance/mark.html', {
+            'form': form,
+            'students': students,
+            'date': date,
+        })
 
     def post(self, request):
         if request.user.role not in ('admin', 'teacher'):
             return redirect('attendance_list')
-        date_str = request.POST.get('date')
+
         from datetime import date as dt
+        import re
+
+        date_str = request.POST.get('date')
         date = dt.fromisoformat(date_str)
-        for key, value in request.POST.items():
-            if key.startswith('status_'):
-                student_id = int(key.split('_')[1])
-                student = get_object_or_404(Student, pk=student_id)
-                Attendance.objects.update_or_create(
-                    student=student, date=date,
-                    defaults={'status': value, 'marked_by': request.user.username}
-                )
-        messages.success(request, 'Attendance saved.')
+
+        # Parse roll numbers — split on commas, spaces, newlines
+        raw = request.POST.get('present_rolls', '')
+        present_rolls = set(r.strip().upper() for r in re.split(r'[\s,]+', raw) if r.strip())
+
+        # Filter scope (class/section if provided)
+        cls = request.POST.get('student_class', '')
+        sec = request.POST.get('section', '')
+        students = Student.objects.filter(is_active=True)
+        if cls:
+            students = students.filter(student_class=cls)
+        if sec:
+            students = students.filter(section=sec)
+
+        present_count = 0
+        absent_count = 0
+        not_found = []
+
+        # Validate that entered roll numbers actually exist in scope
+        for roll in present_rolls:
+            if not students.filter(roll_number__iexact=roll).exists():
+                not_found.append(roll)
+
+        if not_found:
+            messages.warning(request, f'Roll numbers not found: {", ".join(not_found)}')
+
+        # Mark all students in scope
+        for student in students:
+            status = 'present' if student.roll_number.upper() in present_rolls else 'absent'
+            Attendance.objects.update_or_create(
+                student=student, date=date,
+                defaults={'status': status, 'marked_by': request.user.username}
+            )
+            if status == 'present':
+                present_count += 1
+            else:
+                absent_count += 1
+
+        messages.success(request, f'Attendance saved — {present_count} present, {absent_count} absent.')
         return redirect('attendance_list')
 
 
