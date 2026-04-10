@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block page_title %}Student Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+{% if student %}
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card p-3" style="border-color:#1a237e;">
+      <div class="text-muted small">Roll Number</div>
+      <div class="fw-bold fs-5">{{ student.roll_number }}</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card p-3" style="border-color:#2e7d32;">
+      <div class="text-muted small">Class / Section</div>
+      <div class="fw-bold fs-5">{{ student.student_class }} — {{ student.section }}</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card stat-card p-3" style="border-color:#f57c00;">
+      <div class="text-muted small">Attendance</div>
+      <div class="fw-bold fs-5">{{ attendance_pct }}%</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h6 class="fw-bold mb-3">Recent Marks</h6>
+      {% if recent_marks %}
+      <table class="table table-sm mb-0">
+        <thead class="table-light"><tr><th>Subject</th><th>Exam</th><th>Marks</th><th>Grade</th></tr></thead>
+        <tbody>
+          {% for m in recent_marks %}
+          <tr>
+            <td>{{ m.subject.name }}</td>
+            <td>{{ m.get_exam_type_display }}</td>
+            <td>{{ m.marks_obtained }}/{{ m.max_marks }}</td>
+            <td><span class="badge bg-primary">{{ m.grade }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted small">No marks recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-3">
+      <h6 class="fw-bold mb-3">Fee Status</h6>
+      {% if fee_status %}
+      <table class="table table-sm mb-0">
+        <thead class="table-light"><tr><th>Due</th><th>Paid</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for f in fee_status %}
+          <tr>
+            <td>₹{{ f.amount_due }}</td>
+            <td>₹{{ f.amount_paid }}</td>
+            <td>
+              <span class="badge {% if f.status == 'paid' %}bg-success{% elif f.status == 'partial' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                {{ f.status|title }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted small">No fee records found.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning">No student profile linked to your account. Contact admin.</div>
+{% endif %}
+{% endblock %}

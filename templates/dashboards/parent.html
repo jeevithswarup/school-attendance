@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Parent Dashboard{% endblock %}
+{% block page_title %}Parent Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<h5 class="fw-bold mb-3">Your Children</h5>
+{% if students %}
+  {% for student in students %}
+  <div class="card mb-3 p-3">
+    <div class="d-flex justify-content-between align-items-start">
+      <div>
+        <h6 class="fw-bold mb-1">{{ student.full_name }}</h6>
+        <span class="text-muted small">Roll: {{ student.roll_number }} &bull; Class {{ student.student_class }}{{ student.section }}</span>
+      </div>
+      <span class="badge bg-primary">{{ student.attendance_percentage }}% Attendance</span>
+    </div>
+    <div class="mt-2 d-flex gap-2">
+      <a href="{% url 'student_attendance' student.pk %}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-calendar-check me-1"></i>Attendance
+      </a>
+      <a href="{% url 'student_fees' student.pk %}" class="btn btn-outline-warning btn-sm">
+        <i class="bi bi-cash me-1"></i>Fees
+      </a>
+      <a href="{% url 'student_report_card' student.pk %}" class="btn btn-outline-info btn-sm">
+        <i class="bi bi-file-earmark-text me-1"></i>Report Card
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="alert alert-info">No children linked to your account. Contact admin.</div>
+{% endif %}
+{% endblock %}

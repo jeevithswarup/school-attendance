@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Report Card — {{ student.full_name }}{% endblock %}
+{% block page_title %}Report Card{% endblock %}
+{% block nav_marks %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h5 class="fw-bold mb-0">{{ student.full_name }}</h5>
+    <span class="text-muted small">Roll: {{ student.roll_number }} &bull; Class {{ student.student_class }}{{ student.section }}</span>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'report_card_pdf' student.pk %}" class="btn btn-danger btn-sm">
+      <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
+    </a>
+    <a href="{% url 'student_detail' student.pk %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+  </div>
+</div>
+
+<div class="card p-4">
+  <div class="text-center mb-4 pb-3 border-bottom">
+    <h4 class="fw-bold text-primary">SCHOOL MANAGEMENT SYSTEM</h4>
+    <p class="text-muted mb-0">Student Report Card</p>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-sm-6">
+      <dl class="row mb-0">
+        <dt class="col-5">Name</dt><dd class="col-7">{{ student.full_name }}</dd>
+        <dt class="col-5">Roll No</dt><dd class="col-7">{{ student.roll_number }}</dd>
+      </dl>
+    </div>
+    <div class="col-sm-6">
+      <dl class="row mb-0">
+        <dt class="col-5">Class</dt><dd class="col-7">{{ student.student_class }} — {{ student.section }}</dd>
+        <dt class="col-5">Attendance</dt>
+        <dd class="col-7">
+          <span class="badge {% if pct >= 75 %}bg-success{% else %}bg-danger{% endif %}">{{ pct }}%</span>
+        </dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered mb-0">
+      <thead class="table-primary">
+        <tr><th>Subject</th><th>Exam</th><th>Marks</th><th>Max</th><th>%</th><th>Grade</th></tr>
+      </thead>
+      <tbody>
+        {% for m in marks %}
+        <tr>
+          <td>{{ m.subject.name }}</td>
+          <td>{{ m.get_exam_type_display }}</td>
+          <td>{{ m.marks_obtained }}</td>
+          <td>{{ m.max_marks }}</td>
+          <td>{{ m.percentage }}%</td>
+          <td>
+            <span class="badge
+              {% if m.grade == 'A+' or m.grade == 'A' %}bg-success
+              {% elif m.grade == 'B+' or m.grade == 'B' %}bg-primary
+              {% elif m.grade == 'C' %}bg-warning text-dark
+              {% elif m.grade == 'D' %}bg-secondary
+              {% else %}bg-danger{% endif %}">
+              {{ m.grade }}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-3">No marks recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

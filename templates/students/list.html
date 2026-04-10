@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block page_title %}Students{% endblock %}
+{% block nav_students %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="fw-bold mb-0">All Students</h5>
+  {% if request.user.role == 'admin' or request.user.role == 'teacher' %}
+  <a href="{% url 'student_add' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Add Student
+  </a>
+  {% endif %}
+</div>
+
+<!-- Filter -->
+<div class="card p-3 mb-3">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-sm-4">
+      <input type="text" name="q" value="{{ request.GET.q }}" class="form-control form-control-sm" placeholder="Search name / roll...">
+    </div>
+    <div class="col-sm-3">
+      <select name="class" class="form-select form-select-sm">
+        <option value="">All Classes</option>
+        {% for i in "123456789" %}
+        <option value="{{ i }}" {% if request.GET.class == i %}selected{% endif %}>Class {{ i }}</option>
+        {% endfor %}
+        <option value="10" {% if request.GET.class == "10" %}selected{% endif %}>Class 10</option>
+        <option value="11" {% if request.GET.class == "11" %}selected{% endif %}>Class 11</option>
+        <option value="12" {% if request.GET.class == "12" %}selected{% endif %}>Class 12</option>
+      </select>
+    </div>
+    <div class="col-sm-2">
+      <select name="section" class="form-select form-select-sm">
+        <option value="">All Sections</option>
+        <option value="A">A</option><option value="B">B</option>
+        <option value="C">C</option><option value="D">D</option>
+      </select>
+    </div>
+    <div class="col-sm-3">
+      <button class="btn btn-outline-primary btn-sm w-100">Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Roll No</th><th>Name</th><th>Class</th><th>Section</th>
+          <th>Attendance</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.roll_number }}</td>
+          <td>{{ s.full_name }}</td>
+          <td>{{ s.student_class }}</td>
+          <td>{{ s.section }}</td>
+          <td>
+            <span class="badge {% if s.attendance_percentage >= 75 %}bg-success{% else %}bg-danger{% endif %}">
+              {{ s.attendance_percentage }}%
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'student_detail' s.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+            {% if request.user.role == 'admin' or request.user.role == 'teacher' %}
+            <a href="{% url 'student_edit' s.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No students found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
