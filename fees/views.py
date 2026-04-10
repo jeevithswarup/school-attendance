@@ -34,7 +34,12 @@ class FeeCreateView(View):
             return redirect('fee_list')
         form = FeePaymentForm(request.POST)
         if form.is_valid():
-            form.save()
+            payment = form.save()
+            from notifications.emails import notify_fee_due, notify_fee_paid
+            if payment.status in ('pending', 'partial'):
+                notify_fee_due(payment.student, payment)
+            elif payment.status == 'paid':
+                notify_fee_paid(payment.student, payment)
             messages.success(request, 'Fee record added.')
             return redirect('fee_list')
         return render(request, 'fees/form.html', {'form': form, 'title': 'Add Fee Record'})
@@ -54,7 +59,12 @@ class FeeUpdateView(View):
         payment = get_object_or_404(FeePayment, pk=pk)
         form = FeePaymentForm(request.POST, instance=payment)
         if form.is_valid():
-            form.save()
+            payment = form.save()
+            from notifications.emails import notify_fee_due, notify_fee_paid
+            if payment.status in ('pending', 'partial'):
+                notify_fee_due(payment.student, payment)
+            elif payment.status == 'paid':
+                notify_fee_paid(payment.student, payment)
             messages.success(request, 'Fee updated.')
             return redirect('fee_list')
         return render(request, 'fees/form.html', {'form': form, 'title': 'Update Fee'})

@@ -96,6 +96,7 @@ class MarkAttendanceView(View):
             messages.warning(request, f'Roll numbers not found: {", ".join(not_found)}')
 
         # Mark all students in scope
+        from notifications.emails import notify_absent, notify_late
         for student in students:
             status = 'present' if student.roll_number.upper() in present_rolls else 'absent'
             Attendance.objects.update_or_create(
@@ -106,6 +107,7 @@ class MarkAttendanceView(View):
                 present_count += 1
             else:
                 absent_count += 1
+                notify_absent(student, date, marked_by=request.user.username)
 
         messages.success(request, f'Attendance saved — {present_count} present, {absent_count} absent.')
         return redirect('attendance_list')
