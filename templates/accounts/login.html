@@ -70,7 +70,7 @@
       <p style="color:rgba(255,255,255,.7);font-size:.9rem;line-height:1.7;">Track attendance, manage fees, record marks, and generate reports — all in one place.</p>
 
       <div style="display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap;">
-        {% for item in "Students,Attendance,Fees,Marks"|split:"," %}
+        {% for item in features %}
         <div style="background:rgba(255,255,255,.15);border-radius:50px;padding:.4rem 1rem;color:#fff;font-size:.8rem;font-weight:500;backdrop-filter:blur(4px);">
           {{ item }}
         </div>

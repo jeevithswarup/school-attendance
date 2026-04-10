@@ -12,7 +12,8 @@ class LoginView(View):
     def get(self, request):
         if request.user.is_authenticated:
             return redirect('dashboard')
-        return render(request, 'accounts/login.html', {'form': LoginForm()})
+        features = ['Students', 'Attendance', 'Fees', 'Marks']
+        return render(request, 'accounts/login.html', {'form': LoginForm(), 'features': features})
 
     def post(self, request):
         form = LoginForm(request, data=request.POST)
@@ -20,7 +21,8 @@ class LoginView(View):
             user = form.get_user()
             login(request, user)
             return redirect('dashboard')
-        return render(request, 'accounts/login.html', {'form': form})
+        features = ['Students', 'Attendance', 'Fees', 'Marks']
+        return render(request, 'accounts/login.html', {'form': form, 'features': features})
 
 
 class LogoutView(View):
