@@ -16,12 +16,20 @@ class DashboardView(View):
         context = {'user': user}
 
         if user.is_admin():
+            from django.urls import reverse
+            modules = [
+                {'label': 'Students', 'sub': 'Manage records', 'icon': '👨‍🎓', 'url': reverse('student_list'), 'bg': '#dbeafe', 'color': '#1d4ed8'},
+                {'label': 'Attendance', 'sub': 'Daily tracking', 'icon': '📋', 'url': reverse('attendance_list'), 'bg': '#d1fae5', 'color': '#065f46'},
+                {'label': 'Fees', 'sub': 'Payments & dues', 'icon': '💰', 'url': reverse('fee_list'), 'bg': '#fef3c7', 'color': '#92400e'},
+                {'label': 'Marks', 'sub': 'Exams & grades', 'icon': '📊', 'url': reverse('mark_list'), 'bg': '#ede9fe', 'color': '#5b21b6'},
+            ]
             context.update({
                 'total_students': Student.objects.count(),
                 'total_teachers': user.__class__.objects.filter(role='teacher').count(),
                 'today_present': Attendance.objects.filter(
                     date=timezone.now().date(), status='present').count(),
                 'pending_fees': FeePayment.objects.filter(status='pending').count(),
+                'modules': modules,
             })
             return render(request, 'dashboards/admin.html', context)
 
